@@ -5,6 +5,7 @@ import { MediaTypes } from '../../mediaTypes/mediaTypes.js';
 import { PostImageCategory } from '../../models/enums/postImageCategory.js';
 import { showToast } from '../../utils/toast.js';
 import { PostStatus } from '../../models/enums/postStatus.js';
+import { PostCategory } from '../../models/enums/postCategory.js';
 
 const dom = {
 	createPostBtn: document.querySelector("#create-article-btn"),
@@ -32,19 +33,25 @@ const libraries = {
 	turndownService: null
 };
 
+const showPreviewAction = {
+	banner: false,
+	thumbnail: false,
+};
+
 dom.bannerInput.addEventListener('change', () => {
 	showPreview(dom.bannerInput, dom.bannerPreview, dom.bannerCard);
+	showPreviewAction.banner = true;
 });
 
 dom.thumbnailInput.addEventListener('change', () => {
 	showPreview(dom.thumbnailInput, dom.thumbnailPreview, dom.thumbnailCard);
+	showPreviewAction.thumbnail = true;
 });
 
 dom.createPostBtn.addEventListener('click', async () => {
 	try {
 		captureBannerAndThumbnail();
-		await buildPost(PostStatus.PUBLISHED, Number.parseInt(localStorage.getItem('postIdUpdate')))
-		.then();
+		await buildPost(PostStatus.PUBLISHED, Number.parseInt(localStorage.getItem('postIdUpdate')));
 		showToast({message: 'Artigo Publicado com sucesso', type: 'success'});
 		setTimeout(() => {
 			window.location.href = '../../../postManager.html';
@@ -167,47 +174,28 @@ async function buildPost(status, postIdUpdate) {
 	const uploads = [];
 
 	if (postIdUpdate && !isNaN(postIdUpdate)) {
-		const fileIdBannerRemove = document.querySelector("#banner-preview").dataset.fileId;
-		const fileIdThumbnailRemove = document.querySelector("#thumbnail-preview").dataset.fileId;
-	
-		if (fileIdBannerRemove !== undefined) {
-			uploads.push(
-				PostService.updateImageFromPost(
-					imagesFromPost.banner,
-					fileIdBannerRemove,
-					postIdUpdate,
-					PostImageCategory.BANNER
-				)
-			);
-		}
-		else {
-			uploads.push(
-				PostService.uploadImageFromPost(
-					imagesFromPost.banner,
-					postSaved.id,
-					PostImageCategory.BANNER
-				)
-			);
-		}
+		let fileIdBannerRemove;
+		let fileIdThumbnailRemove;
 
-		if (fileIdThumbnailRemove !== undefined) {
-			uploads.push(
-				PostService.updateImageFromPost(
-					imagesFromPost.thumbnail,
-					fileIdThumbnailRemove,
-					postIdUpdate,
-					PostImageCategory.THUMBNAIL
-				)
-			);
-		}
-		else {
-			uploads.push(
-				PostService.uploadImageFromPost(
-					imagesFromPost.thumbnail,
-					postSaved.id,
-					PostImageCategory.THUMBNAIL
-				)
-			);
+		if (showPreviewAction.banner) {
+			fileIdBannerRemove = document.querySelector("#banner-preview").dataset.fileId;
+
+			if (fileIdBannerRemove !== undefined) {
+				await PostService.updateImageFromPost(imagesFromPost.banner, fileIdBannerRemove, postIdUpdate, PostImageCategory.BANNER);
+			}
+			else {
+			  await PostService.uploadImageFromPost(imagesFromPost.banner, postIdUpdate, PostImageCategory.BANNER);
+			}
+		} 
+		if (showPreviewAction.thumbnail) {
+			fileIdThumbnailRemove = document.querySelector("#thumbnail-preview").dataset.fileId;
+			
+			if (fileIdThumbnailRemove !== undefined) {
+				await PostService.updateImageFromPost(imagesFromPost.thumbnail, fileIdThumbnailRemove, postIdUpdate, PostImageCategory.THUMBNAIL);
+			}
+			else {
+				await PostService.uploadImageFromPost(imagesFromPost.thumbnail, postIdUpdate, PostImageCategory.THUMBNAIL);
+			}
 		}
 
 		post.id = postIdUpdate;
