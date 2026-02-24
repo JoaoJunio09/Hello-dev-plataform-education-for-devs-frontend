@@ -12,19 +12,7 @@ h1, h2 {
     margin-bottom: 20px;
 }
 
-button {
-    padding: 10px 16px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-}
 
-button:hover {
-    background: #1d4ed8;
-}
 
 pre {
     background: #111827;
@@ -603,3 +591,182 @@ pre {
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
         
+        :root {
+            --hd-dark: #0f172a;
+            --hd-indigo: #4f46e5;
+            --hd-purple: #9333ea;
+            --hd-slate-400: #94a3b8;
+            --hd-slate-500: #64748b;
+            --white: #ffffff;
+            --modal-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .toast button {
+            background: transparent;
+            color: var(--slate-500);
+            padding: 4px;
+            font-weight: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Prevenção de Scroll quando ativo */
+        body.loading-active {
+            overflow: hidden;
+        }
+
+        /* Overlay (Fundo) */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6); /* --hd-dark com opacidade */
+            backdrop-filter: blur(4px); /* Efeito de desfoque profissional */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Card Central */
+        .loading-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: var(--modal-shadow);
+            width: 90%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .loading-overlay.active .loading-card {
+            transform: translateY(0);
+        }
+
+        /* Logo HelloDev (Placeholder Visual) */
+        .loading-card img {
+            width: 50px;
+        }
+
+        /* Spinner Animado */
+        .spinner-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1.5rem;
+        }
+
+        .spinner {
+            width: 100%;
+            height: 100%;
+            border: 4px solid var(--hd-slate-100);
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0%, var(--hd-indigo) 100%);
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff 0);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff 0);
+            animation: spin 1s linear infinite;
+        }
+
+        /* Textos */
+        .loading-title {
+            color: var(--hd-dark);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .loading-subtitle {
+            color: var(--hd-slate-500);
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* Animações CSS */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes logo-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+
+        /* Dots animados no texto */
+        .dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            33% { content: '.'; }
+            66% { content: '..'; }
+            100% { content: '...'; }
+        }
+
+        /* Responsividade */
+        @media (max-width: 480px) {
+            .loading-card {
+                padding: 2rem 1.5rem;
+            }
+            .loading-title {
+                font-size: 1.125rem;
+            }
+        }
+
+
+        /* Animação da barra de progresso */
+    @keyframes toast-progress {
+        from { width: 0%; }
+        to { width: 100%; }
+    }
+
+    /* Animação de entrada e saída */
+    .toast-enter {
+        animation: toast-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .toast-exit {
+        animation: toast-out 0.3s ease-in forwards;
+    }
+
+    @keyframes toast-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes toast-out {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+
+    .toast-progress-bar {
+        height: 3px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        animation: toast-progress linear forwards;
+    }

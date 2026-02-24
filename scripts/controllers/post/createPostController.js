@@ -22,7 +22,9 @@ const dom = {
 
 const imagesFromPost = {
 	banner: null,
-	thumbnail: null
+	thumbnail: null,
+	bannerUpdate: null,
+	thumbnailUpdate: null,
 };
 
 const libraries = {
@@ -106,8 +108,9 @@ async function getPost({ postId }) {
 			const html = marked.parse(post.content);
 			libraries.quill.root.innerHTML = html;
 
-			if (post.bannerUrl) {
-				dom.bannerPreview.src = post.bannerUrl;
+			if (post.banner) {
+				dom.bannerPreview.src = post.banner.url;
+				dom.bannerPreview.dataset.fileId = post.banner.fileId;
 				dom.bannerPreview.style.display = "block";
 
 				const span = dom.bannerCard.querySelector("span");
@@ -116,8 +119,9 @@ async function getPost({ postId }) {
 				}
 			}
 
-			if (post.thumbnailUrl) {
-				dom.thumbnailPreview.src = post.thumbnailUrl;
+			if (post.thumbnail) {
+				dom.thumbnailPreview.src = post.thumbnail.url;
+				dom.thumbnailPreview.dataset.fileId = post.thumbnail.fileId;
 				dom.thumbnailPreview.style.display = "block";
 
 				const span = dom.thumbnailCard.querySelector("span");
@@ -160,8 +164,52 @@ async function buildPost(status, postIdUpdate) {
 	);
 
 	let postSaved = null;
+	const uploads = [];
 
 	if (postIdUpdate && !isNaN(postIdUpdate)) {
+		const fileIdBannerRemove = document.querySelector("#banner-preview").dataset.fileId;
+		const fileIdThumbnailRemove = document.querySelector("#thumbnail-preview").dataset.fileId;
+	
+		if (fileIdBannerRemove !== undefined) {
+			uploads.push(
+				PostService.updateImageFromPost(
+					imagesFromPost.banner,
+					fileIdBannerRemove,
+					postIdUpdate,
+					PostImageCategory.BANNER
+				)
+			);
+		}
+		else {
+			uploads.push(
+				PostService.uploadImageFromPost(
+					imagesFromPost.banner,
+					postSaved.id,
+					PostImageCategory.BANNER
+				)
+			);
+		}
+
+		if (fileIdThumbnailRemove !== undefined) {
+			uploads.push(
+				PostService.updateImageFromPost(
+					imagesFromPost.thumbnail,
+					fileIdThumbnailRemove,
+					postIdUpdate,
+					PostImageCategory.THUMBNAIL
+				)
+			);
+		}
+		else {
+			uploads.push(
+				PostService.uploadImageFromPost(
+					imagesFromPost.thumbnail,
+					postSaved.id,
+					PostImageCategory.THUMBNAIL
+				)
+			);
+		}
+
 		post.id = postIdUpdate;
 		postSaved = await PostService.updatePost(post, MediaTypes.JSON);
 	}
@@ -171,28 +219,26 @@ async function buildPost(status, postIdUpdate) {
 		if (!postIdUpdate && (!imagesFromPost.banner || !imagesFromPost.thumbnail)) {
 			throw new Exceptions.BannerOrThumbnailIsNullException("The Banner or Thumbnail is invalid");
 		}
-	}
 
-	const uploads = [];
+		if (imagesFromPost.banner) {
+			uploads.push(
+				PostService.uploadImageFromPost(
+					imagesFromPost.banner,
+					postSaved.id,
+					PostImageCategory.BANNER
+				)
+			);
+		}
 
-	if (imagesFromPost.banner) {
-		uploads.push(
-			PostService.uploadImageFromPost(
-				imagesFromPost.banner,
-				postSaved.id,
-				PostImageCategory.BANNER
-			)
-		);
-	}
-
-	if (imagesFromPost.thumbnail) {
-		uploads.push(
-			PostService.uploadImageFromPost(
-				imagesFromPost.thumbnail,
-				postSaved.id,
-				PostImageCategory.THUMBNAIL
-			)
-		);
+		if (imagesFromPost.thumbnail) {
+			uploads.push(
+				PostService.uploadImageFromPost(
+					imagesFromPost.thumbnail,
+					postSaved.id,
+					PostImageCategory.THUMBNAIL
+				)
+			);
+		}
 	}
 
 	if (uploads.length > 0) {
@@ -231,7 +277,7 @@ function showPreview(input, previewImg, card) {
 	const url = URL.createObjectURL(file);
 
 	if (previewImg.src !== null) {
-		console.log('update');
+		previewImg.src = url;
 	}
 	else {
 		previewImg.src = url;

@@ -11,9 +11,10 @@ const CREATE_POST_URL = `${BASE_URL}/api/posts/v1`;
 const UPLOAD_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/uploadImageFromPost/{postId}?category={category}`;
 const GET_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/getImageFromPost/{fileId}`;
 const UPDATE_POST_URL = `${BASE_URL}/api/posts/v1`;
+const UPDATE_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/updateImageFromPost/{fileIdRemove}/{postId}?category={category}`;
 const DELETE_POST_URL = `${BASE_URL}/api/posts/v1/{postId}`;
 
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzE4OTQ2NTYsImV4cCI6MTc3MTg5ODI1Niwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.PRq3BlHnWHJbxtp7-dzgx3vr56j0d4Hijx1lJCNV-6Q";
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzE5NDU3MjUsImV4cCI6MTc3MTk0OTMyNSwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.-RGw8Ixqhb0dje8uvLi0UbSmmCcBTO6uF3Fd8SAooBo";
 
 async function findAllPageable(contentType, pageable) {
 	try {
@@ -203,6 +204,25 @@ async function uploadImageFromPost(imageFormData, postId, category) {
 	return await response.json();
 }
 
+async function updateImageFromPost(imageFormData, fileIdRemove, postId, category) {
+	const urlFileIdRemove = UPDATE_IMAGE_FROM_POST_URL.replace("{fileIdRemove}", fileIdRemove);
+	const urlPostId = urlFileIdRemove.replace("{postId}", postId);
+	const url = urlPostId.replace("{category}", category);
+	const response = await fetch(url, {
+		'method': 'PUT',
+		'headers': {
+			'Authorization': `Bearer ${TOKEN}`,
+		},
+		'body': imageFormData
+	});
+
+	if (!response.ok) {
+		throw new Error(`Error uploading post: ${response.status}`);
+	}
+
+	return await response.json();
+}
+
 async function getImageFromPost(fileId) {
 	const url = GET_IMAGE_FROM_POST_URL.replace("{fileId}", fileId);
 	const response = await fetch(url, {
@@ -263,5 +283,6 @@ export const PostService = {
 	updatePost: update,
 	deletePost: deletePost,
 	uploadImageFromPost: uploadImageFromPost,
+	updateImageFromPost: updateImageFromPost,
 	getImageFromPost: getImageFromPost
 };

@@ -47,7 +47,7 @@ import { PostStatus } from '../../models/enums/postStatus.js';
                     <div class="w-full lg:w-3/5 h-64 lg:h-full overflow-hidden relative">
                         <div class="absolute inset-0 bg-indigo-900/10 group-hover:bg-transparent transition-colors z-10"></div>
                         <img 
-                            src="${article.thumbnailUrl !== null ? article.thumbnailUrl : imgDefault}"
+                            src="${article.thumbnail.url !== null ? article.thumbnail.url : imgDefault}"
                             alt="${article.title}" 
                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                         />
@@ -121,7 +121,7 @@ import { PostStatus } from '../../models/enums/postStatus.js';
                       <!-- Card Image -->
                       <div class="relative h-56 overflow-hidden">
                           <img 
-                              src="${article.thumbnailUrl !== null ? article.thumbnailUrl : imgDefault}"
+                              src="${article.thumbnail.url !== null ? article.thumbnail.url : imgDefault}"
                               alt="${article.title}" 
                               class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                           />

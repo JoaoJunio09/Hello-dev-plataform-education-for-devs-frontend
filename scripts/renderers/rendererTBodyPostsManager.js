@@ -19,7 +19,7 @@ export function rendererTBodyPostsManager(posts, tbody, update) {
 		const days = contentTbody.querySelector("#days");
 		const commentesInfo = contentTbody.querySelector("#comments-info");
 		const likesInfo = contentTbody.querySelector("#likes-info");
-		thumbnail.src = post.thumbnailUrl;
+		thumbnail.src = post.thumbnail === null ? "" : post.thumbnail.url;
 		title.textContent = post.title;
 		status.textContent = post.status === "" ? "Não informado" : (post.status === PostStatus.PUBLISHED ? "PUBLICADO" : "RASCUNHO");
 		category.textContent = post.category === "" 
