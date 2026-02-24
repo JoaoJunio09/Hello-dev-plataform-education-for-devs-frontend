@@ -13,7 +13,7 @@ const GET_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/getImageFromPost/{file
 const UPDATE_POST_URL = `${BASE_URL}/api/posts/v1`;
 const DELETE_POST_URL = `${BASE_URL}/api/posts/v1/{postId}`;
 
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzE1NDczNTgsImV4cCI6MTc3MTU1MDk1OCwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.0G1UVSiIqYZlhqAN5-XJNg1_i47SeEnYW32njdaIfmA";
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzE4OTQ2NTYsImV4cCI6MTc3MTg5ODI1Niwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.PRq3BlHnWHJbxtp7-dzgx3vr56j0d4Hijx1lJCNV-6Q";
 
 async function findAllPageable(contentType, pageable) {
 	try {
@@ -23,8 +23,7 @@ async function findAllPageable(contentType, pageable) {
 		const response = await fetch(url, {
 			'method': 'GET',
 			'headers':{
-				'Accept': contentType,
-				'Authorization': `Bearer ${TOKEN}`
+				'Accept': contentType
 			}
 		});
 
@@ -48,8 +47,7 @@ async function findAll(contentType) {
 		const response = await fetch(FIND_ALL_POSTS_URL, {
 			'method': 'GET',
 			'headers':{
-				'Accept': contentType,
-				'Authorization': `Bearer ${TOKEN}`
+				'Accept': contentType
 			}
 		});
 
@@ -77,8 +75,7 @@ async function findAllPageableByStatus(contentType, pageable, status) {
 		const response = await fetch(url, {
 			'method': 'GET',
 			'headers':{
-				'Accept': contentType,
-				'Authorization': `Bearer ${TOKEN}`
+				'Accept': contentType
 			}
 		});
 
@@ -106,8 +103,7 @@ async function findAllPageableByCategory(contentType, pageable, category) {
 		const response = await fetch(url, {
 			'method': 'GET',
 			'headers':{
-				'Accept': contentType,
-				'Authorization': `Bearer ${TOKEN}`
+				'Accept': contentType
 			}
 		});
 
@@ -136,8 +132,7 @@ async function findAllPageableByStatusAndCategory(contentType, pageable, status,
 		const response = await fetch(url, {
 			'method': 'GET',
 			'headers':{
-				'Accept': contentType,
-				'Authorization': `Bearer ${TOKEN}`
+				'Accept': contentType
 			}
 		});
 
@@ -161,12 +156,12 @@ async function findById(postId, contentType) {
 	const response = await fetch(url, {
 		'method': 'GET',
 		'headers':{
-			'Accept': contentType,
-			'Authorization': `Bearer ${TOKEN}`
+			'Accept': contentType
 		}
 	});
 
 	if (!response.ok) {
+		console.log(response)
 		throw new Error(`Error fetching [findById] post: ${response.statusText}`);
 	}
 
@@ -212,9 +207,6 @@ async function getImageFromPost(fileId) {
 	const url = GET_IMAGE_FROM_POST_URL.replace("{fileId}", fileId);
 	const response = await fetch(url, {
 		'method': 'GET',
-		'headers': {
-			'Authorization': `Bearer ${TOKEN}`
-		}
 	});
 
 	if (!response.ok) {

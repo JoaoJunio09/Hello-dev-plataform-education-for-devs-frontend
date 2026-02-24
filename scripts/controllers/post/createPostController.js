@@ -1,12 +1,10 @@
-import { PostService } from '../../services/postService.js';
+ import { PostService } from '../../services/postService.js';
 import { Post } from '../../models/post.js';
 import { Exceptions } from '../../exceptions/exceptions.js';
 import { MediaTypes } from '../../mediaTypes/mediaTypes.js';
 import { PostImageCategory } from '../../models/enums/postImageCategory.js';
 import { showToast } from '../../utils/toast.js';
 import { PostStatus } from '../../models/enums/postStatus.js';
-
-const USERNAME_DEFAULT = "jotajota";
 
 const dom = {
 	createPostBtn: document.querySelector("#create-article-btn"),
@@ -20,15 +18,6 @@ const dom = {
 	thumbnailCard: document.querySelector(".thumb-upload"),
 	modalErrorDataIsNullOrEmpty: document.getElementById('error-modal'),
   closemodalErrorDataIsNullOrEmpty: document.getElementById('close-modal'),
-};
-
-const postData = {
-	title: null,
-	subTitle: null,
-	description: null,
-	content: null,
-	date: null,
-	userDTO: null
 };
 
 const imagesFromPost = {
@@ -52,7 +41,8 @@ dom.thumbnailInput.addEventListener('change', () => {
 dom.createPostBtn.addEventListener('click', async () => {
 	try {
 		captureBannerAndThumbnail();
-		await getPost(PostStatus.PUBLISHED);
+		await buildPost(PostStatus.PUBLISHED, Number.parseInt(localStorage.getItem('postIdUpdate')))
+		.then();
 		showToast({message: 'Artigo Publicado com sucesso', type: 'success'});
 		setTimeout(() => {
 			window.location.href = '../../../postManager.html';
@@ -67,7 +57,7 @@ dom.createPostBtn.addEventListener('click', async () => {
 dom.draftPostBtn.addEventListener('click', async () => {
 	try {
 		captureBannerAndThumbnail();
-		await getPost(PostStatus.DRAFT);
+		await buildPost(PostStatus.DRAFT, Number.parseInt(localStorage.getItem('postIdUpdate')));
 		showToast({message: 'Rascunho salvo com sucesso', type: 'success'});
 		setTimeout(() => {
 			window.location.href = '../../../postManager.html';
@@ -95,45 +85,119 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-async function getPost(status) {
+document.addEventListener('DOMContentLoaded', async () => {
+	initializeQuillAndTurndown();
+	const postId = localStorage.getItem('postIdUpdate');
+	if (postId !== "") {
+		getPost({ postId: Number.parseInt(postId) });
+	}
+});
+
+async function getPost({ postId }) {
 	try {
-		const htmlContent = libraries.quill.root.innerHTML;
-		const markdown = libraries.turndownService.turndown(htmlContent);
+		if (postId !== null) {
+			const post = await PostService.findByIdPost(postId, MediaTypes.JSON);
 
-		retrievesDataAndValidadesIt(markdown);
+			document.querySelector(".input-title").value = post.title;
+			document.querySelector(".input-subtitle").value = post.subTitle;
+			document.querySelector(".input-description").value = post.description;
+			document.querySelector("#username").value = post.userDTO.username;
 
-		let post = new Post(
-			postData.title,
-			postData.subTitle,
-			postData.description,
-			postData.content,
-			formatDate(postData.date),
-			status,
-			"FRONTEND",
-			postData.userDTO
-		);
+			const html = marked.parse(post.content);
+			libraries.quill.root.innerHTML = html;
 
-		if (imagesFromPost.banner == null || imagesFromPost.thumbnail == null) {
-			throw new Exceptions.BannerOrThumbnailIsNullException("The Banner or Thumbnail is invalid");
+			if (post.bannerUrl) {
+				dom.bannerPreview.src = post.bannerUrl;
+				dom.bannerPreview.style.display = "block";
+
+				const span = dom.bannerCard.querySelector("span");
+				if (span) {
+					span.style.display = "none";
+				}
+			}
+
+			if (post.thumbnailUrl) {
+				dom.thumbnailPreview.src = post.thumbnailUrl;
+				dom.thumbnailPreview.style.display = "block";
+
+				const span = dom.thumbnailCard.querySelector("span");
+				if (span) {
+					span.style.display = "none";
+				}
+			}
+
+			return;
 		}
+	} catch (e) {
+		throw e;
+	}
+}
 
-		const postCreated = await PostService.createPost(post, MediaTypes.JSON);
+async function buildPost(status, postIdUpdate) {
+	const title = document.querySelector(".input-title").value;
+	const subTitle = document.querySelector(".input-subtitle").value;
+	const description = document.querySelector(".input-description").value;
+	const username = document.querySelector("#username").value = "jotajota";
+	const htmlContent = libraries.quill.root.innerHTML;
+	const markdown = libraries.turndownService.turndown(htmlContent);
+
+
+	if (!title || !subTitle || !description || !markdown) {
+		throw new Exceptions.TheDataIsEmptyOsNull("Fill in all the information.");
+	}
+
+	let post = new Post(
+		title,
+		subTitle,
+		description,
+		markdown,
+		formatDate(new Date().toLocaleDateString()),
+		status,
+		"FRONTEND",
+		{ username: username }
+	);
+
+	let postSaved = null;
+
+	if (postIdUpdate !== null || postIdUpdate !== "") {
+		post.id = postIdUpdate;
+		postSaved = await PostService.updatePost(post, MediaTypes.JSON);
+
+		captureBannerAndThumbnail();
 
 		await Promise.all([
 			PostService.uploadImageFromPost(
 				imagesFromPost.banner, 
-				postCreated.id, 
+				postSaved.id, 
 				PostImageCategory.BANNER
 			),
 			PostService.uploadImageFromPost(
 				imagesFromPost.thumbnail, 
-				postCreated.id, 
+				postSaved.id, 
 				PostImageCategory.THUMBNAIL
 			)
 		]);
-	} catch (e) {
-		throw e;
 	}
+	else {
+		postSaved = await PostService.createPost(post, MediaTypes.JSON);
+	}
+	
+	if (imagesFromPost.banner == null || imagesFromPost.thumbnail == null) {
+		throw new Exceptions.BannerOrThumbnailIsNullException("The Banner or Thumbnail is invalid");
+	}
+
+	await Promise.all([
+		PostService.uploadImageFromPost(
+			imagesFromPost.banner, 
+			postSaved.id, 
+			PostImageCategory.BANNER
+		),
+		PostService.uploadImageFromPost(
+			imagesFromPost.thumbnail, 
+			postSaved.id, 
+			PostImageCategory.THUMBNAIL
+		)
+	]);
 }
 
 function formatDate(date) {
@@ -141,25 +205,6 @@ function formatDate(date) {
 	const month = date.slice(3, 5);
 	const age = date.slice(6, 10);
 	return `${age}-${month}-${day}`;
-}
-
-function retrievesDataAndValidadesIt(content) {
-	const titleText = document.querySelector(".input-title").value;
-	const subTitleText = document.querySelector(".input-subtitle").value;
-	const descriptionText = document.querySelector(".input-description").value;
-	
-	if (titleText !== null) postData.title = titleText;
-	if (subTitleText !== null) postData.subTitle = subTitleText;
-	if (descriptionText !== null) postData.description = descriptionText;
-	postData.date = new Date().toLocaleDateString();
-	postData.content = content;
-	postData.userDTO = {username: USERNAME_DEFAULT};
-
-	if (postData.title === "" || postData.subTitle === "" || 
-		postData.description === "" || postData.date === null || postData.content === ""
-	) {
-		throw new Exceptions.TheDataIsEmptyOsNull("Fill in all the information to publish the post.");
-	}
 }
 
 function captureBannerAndThumbnail() {
@@ -201,10 +246,6 @@ function closeErrorTheDataIsNullOrEmptyModal() {
   dom.modalErrorDataIsNullOrEmpty.classList.remove('active');
   document.body.classList.remove('modal-open');
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-	initializeQuillAndTurndown();
-});
 
 function initializeQuillAndTurndown() {
 	libraries.quill = new Quill('#editor', {

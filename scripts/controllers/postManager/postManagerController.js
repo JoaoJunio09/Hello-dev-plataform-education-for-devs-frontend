@@ -28,7 +28,6 @@ export let dom = {
 		totalLikes: document.querySelector("#likes"),
 		drafts: document.querySelector("#drafts")
 	},
-	postActions: {},
 	postInformation: {
 		currentPageNumberControl: document.querySelector("#current-page-control"),
 	},
@@ -47,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	try {
 		await fillInTheInformationOnThePreviewPanel();
-		initializeDomAndButtons();
+		initializeDom();
 	} catch (e) {
 		if (e instanceof Exceptions.ServerConnectionException) window.location.href = '../../../error.html';
 	} finally {
@@ -87,6 +86,7 @@ export async function renderPostsAndUpdatePaginationControl(list, update) {
 	const posts = list._embedded.postDTOList;
 	rendererTBodyPostsManager(posts, document.querySelector("#body-table-posts-manager"), update);
 	updatePaginationControl(list);
+	initializeButtonsPost();
 }
 
 function updatePaginationControl(list) {
@@ -128,7 +128,36 @@ function updatePaginationData(list) {
 	dom.page.listLength = list._embedded.postDTOList.length;
 }
 
-function initializeDomAndButtons() {
+function initializeButtonsPost() {
+	document.querySelectorAll("#btn-edit").forEach(btn => {
+		btn.addEventListener('click', async (event) => {
+			edit(event);
+		});
+	});
+
+	document.querySelectorAll("#btn-share").forEach(btn => {
+		btn.addEventListener('click', async (event) => {
+			console.log("clico");
+		});
+	});
+
+	document.querySelectorAll("#btn-remove").forEach(btn => {
+		btn.addEventListener('click', async (event) => {
+			console.log("clico");
+		});
+	});
+}
+
+async function edit(event) {
+	const postId = event.target.closest(".table-row-hover").dataset.id;
+	const post = await PostService.findByIdPost(postId, MediaTypes.JSON);
+	if (post !== null) {
+		localStorage.setItem('postIdUpdate', postId);
+		window.location.href = '../../../createPost.html';
+	}
+}
+
+function initializeDom() {
 	dom.postActions.btnsToShare = document.querySelectorAll(".btn-share");
 	dom.postActions.btnsEdit = document.querySelectorAll(".btn-edit");
 	dom.postActions.btnsRemove = document.querySelectorAll(".btn-remove");
@@ -137,24 +166,6 @@ function initializeDomAndButtons() {
 	dom.postInformation.likesInfoForPost = document.querySelectorAll(".likes-info");
 	dom.postInformation.date = document.querySelectorAll(".date");
 	dom.postInformation.days = document.querySelectorAll(".days");
-
-	dom.postActions.btnsToShare.forEach(btn => {
-		btn.addEventListener('click', () => {
-			console.log("clico");
-		});
-	});
-
-	dom.postActions.btnsEdit.forEach(btn => {
-		btn.addEventListener('click', () => {
-			console.log("clico");
-		});
-	});
-
-	dom.postActions.btnsRemove.forEach(btn => {
-		btn.addEventListener('click', () => {
-			console.log("clico");
-		});
-	});
 }
 
 function loading() {

@@ -7,6 +7,10 @@ export function rendererTBodyPostsManager(posts, tbody, update) {
 		const template = document.getElementById("template-posts-manager");
 		const contentTbody = template.content.cloneNode(true);
 
+		const row = contentTbody.querySelector("tr");
+
+		row.dataset.id = post.id;
+		
 		const thumbnail = contentTbody.querySelector("#thumbnail");
 		const title = contentTbody.querySelector("#title");
 		const status = contentTbody.querySelector("#status");

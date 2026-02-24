@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   catch (e) {
     showToast({message: 'Não foi possível carregar o Artigo', type: 'info'});
     setTimeout(() => {
-      window.location.href = '../../../post.html';
+      window.location.href = '../../../posts.html';
     }, 4000);
   }
   finally {
