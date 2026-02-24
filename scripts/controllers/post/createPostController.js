@@ -134,13 +134,15 @@ async function getPost({ postId }) {
 }
 
 async function buildPost(status, postIdUpdate) {
+	imagesFromPost.banner = imagesFromPost.banner || null;
+	imagesFromPost.thumbnail = imagesFromPost.thumbnail || null;
+
 	const title = document.querySelector(".input-title").value;
 	const subTitle = document.querySelector(".input-subtitle").value;
 	const description = document.querySelector(".input-description").value;
 	const username = document.querySelector("#username").value = "jotajota";
 	const htmlContent = libraries.quill.root.innerHTML;
 	const markdown = libraries.turndownService.turndown(htmlContent);
-
 
 	if (!title || !subTitle || !description || !markdown) {
 		throw new Exceptions.TheDataIsEmptyOsNull("Fill in all the information.");
@@ -159,45 +161,43 @@ async function buildPost(status, postIdUpdate) {
 
 	let postSaved = null;
 
-	if (postIdUpdate !== null || postIdUpdate !== "") {
+	if (postIdUpdate && !isNaN(postIdUpdate)) {
 		post.id = postIdUpdate;
 		postSaved = await PostService.updatePost(post, MediaTypes.JSON);
-
-		captureBannerAndThumbnail();
-
-		await Promise.all([
-			PostService.uploadImageFromPost(
-				imagesFromPost.banner, 
-				postSaved.id, 
-				PostImageCategory.BANNER
-			),
-			PostService.uploadImageFromPost(
-				imagesFromPost.thumbnail, 
-				postSaved.id, 
-				PostImageCategory.THUMBNAIL
-			)
-		]);
 	}
 	else {
 		postSaved = await PostService.createPost(post, MediaTypes.JSON);
-	}
-	
-	if (imagesFromPost.banner == null || imagesFromPost.thumbnail == null) {
-		throw new Exceptions.BannerOrThumbnailIsNullException("The Banner or Thumbnail is invalid");
+
+		if (!postIdUpdate && (!imagesFromPost.banner || !imagesFromPost.thumbnail)) {
+			throw new Exceptions.BannerOrThumbnailIsNullException("The Banner or Thumbnail is invalid");
+		}
 	}
 
-	await Promise.all([
-		PostService.uploadImageFromPost(
-			imagesFromPost.banner, 
-			postSaved.id, 
-			PostImageCategory.BANNER
-		),
-		PostService.uploadImageFromPost(
-			imagesFromPost.thumbnail, 
-			postSaved.id, 
-			PostImageCategory.THUMBNAIL
-		)
-	]);
+	const uploads = [];
+
+	if (imagesFromPost.banner) {
+		uploads.push(
+			PostService.uploadImageFromPost(
+				imagesFromPost.banner,
+				postSaved.id,
+				PostImageCategory.BANNER
+			)
+		);
+	}
+
+	if (imagesFromPost.thumbnail) {
+		uploads.push(
+			PostService.uploadImageFromPost(
+				imagesFromPost.thumbnail,
+				postSaved.id,
+				PostImageCategory.THUMBNAIL
+			)
+		);
+	}
+
+	if (uploads.length > 0) {
+		await Promise.all(uploads);
+	}
 }
 
 function formatDate(date) {
@@ -230,7 +230,12 @@ function showPreview(input, previewImg, card) {
 
 	const url = URL.createObjectURL(file);
 
-	previewImg.src = url;
+	if (previewImg.src !== null) {
+		console.log('update');
+	}
+	else {
+		previewImg.src = url;
+	}
 	previewImg.style.display = "block";
 
 	const span = card.querySelector("span");
