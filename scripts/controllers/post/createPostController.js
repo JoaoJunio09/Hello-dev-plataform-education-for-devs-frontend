@@ -170,68 +170,48 @@ async function buildPost(status, postIdUpdate) {
 		{ username: username }
 	);
 
-	let postSaved = null;
-	const uploads = [];
+	postIdUpdate && !isNaN(postIdUpdate) 
+		? await update(post, postIdUpdate)
+		: create(post, postIdUpdate);
+}
 
-	if (postIdUpdate && !isNaN(postIdUpdate)) {
-		let fileIdBannerRemove;
-		let fileIdThumbnailRemove;
+async function create(post, postIdUpdate) {
+	const postSaved = await PostService.createPost(post, MediaTypes.JSON);
 
-		if (showPreviewAction.banner) {
-			fileIdBannerRemove = document.querySelector("#banner-preview").dataset.fileId;
-
-			if (fileIdBannerRemove !== undefined) {
-				await PostService.updateImageFromPost(imagesFromPost.banner, fileIdBannerRemove, postIdUpdate, PostImageCategory.BANNER);
-			}
-			else {
-			  await PostService.uploadImageFromPost(imagesFromPost.banner, postIdUpdate, PostImageCategory.BANNER);
-			}
-		} 
-		if (showPreviewAction.thumbnail) {
-			fileIdThumbnailRemove = document.querySelector("#thumbnail-preview").dataset.fileId;
-			
-			if (fileIdThumbnailRemove !== undefined) {
-				await PostService.updateImageFromPost(imagesFromPost.thumbnail, fileIdThumbnailRemove, postIdUpdate, PostImageCategory.THUMBNAIL);
-			}
-			else {
-				await PostService.uploadImageFromPost(imagesFromPost.thumbnail, postIdUpdate, PostImageCategory.THUMBNAIL);
-			}
-		}
-
-		post.id = postIdUpdate;
-		postSaved = await PostService.updatePost(post, MediaTypes.JSON);
-	}
-	else {
-		postSaved = await PostService.createPost(post, MediaTypes.JSON);
-
-		if (!postIdUpdate && (!imagesFromPost.banner || !imagesFromPost.thumbnail)) {
-			throw new Exceptions.BannerOrThumbnailIsNullException("The Banner or Thumbnail is invalid");
-		}
-
-		if (imagesFromPost.banner) {
-			uploads.push(
-				PostService.uploadImageFromPost(
-					imagesFromPost.banner,
-					postSaved.id,
-					PostImageCategory.BANNER
-				)
-			);
-		}
-
-		if (imagesFromPost.thumbnail) {
-			uploads.push(
-				PostService.uploadImageFromPost(
-					imagesFromPost.thumbnail,
-					postSaved.id,
-					PostImageCategory.THUMBNAIL
-				)
-			);
-		}
+	if (!postIdUpdate && (!imagesFromPost.banner || !imagesFromPost.thumbnail)) {
+		throw new Exceptions.BannerOrThumbnailIsNullException("The Banner or Thumbnail is invalid");
 	}
 
-	if (uploads.length > 0) {
-		await Promise.all(uploads);
+	imagesFromPost.banner
+		? await	PostService.uploadImageFromPost(imagesFromPost.banner, postSaved.id, PostImageCategory.BANNER) 
+		: null;
+	imagesFromPost.thumbnail
+		? await PostService.uploadImageFromPost(imagesFromPost.thumbnail, postSaved.id, PostImageCategory.THUMBNAIL)
+		: null;
+}
+
+async function update(post, postIdUpdate) {
+	let fileIdBannerRemove;
+	let fileIdThumbnailRemove;
+
+	if (showPreviewAction.banner) {
+		fileIdBannerRemove = document.querySelector("#banner-preview").dataset.fileId;
+
+		fileIdBannerRemove !== undefined 
+			? await PostService.updateImageFromPost(imagesFromPost.banner, fileIdBannerRemove, postIdUpdate, PostImageCategory.BANNER)
+			: await PostService.uploadImageFromPost(imagesFromPost.banner, postIdUpdate, PostImageCategory.BANNER);
 	}
+
+	if (showPreviewAction.thumbnail) {
+		fileIdThumbnailRemove = document.querySelector("#thumbnail-preview").dataset.fileId;
+
+		fileIdThumbnailRemove !== undefined 
+			? await PostService.updateImageFromPost(imagesFromPost.thumbnail, fileIdThumbnailRemove, postIdUpdate, PostImageCategory.THUMBNAIL)
+			: await PostService.uploadImageFromPost(imagesFromPost.thumbnail, postIdUpdate, PostImageCategory.THUMBNAIL);
+	}
+
+	post.id = postIdUpdate;
+	await PostService.updatePost(post, MediaTypes.JSON);
 }
 
 function formatDate(date) {
