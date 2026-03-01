@@ -2,6 +2,7 @@ import { PostService } from "../../services/postService.js";
 import { MediaTypes } from "../../mediaTypes/mediaTypes.js";
 import { renderPostsAndUpdatePaginationControl } from "./postManagerController.js";
 import { dom } from "./postManagerController.js";
+import { showToast } from "../../utils/toast.js";
 
 export let valueSearch = "";
 
@@ -21,6 +22,10 @@ const handleSearch = async (value) => {
 				{ page: 0, size: 4, direction: 'asc' },
 				value 
 			);
+
+	if (list._embedded === undefined) {
+		showToast({message: `Não existe resultados para ${value}`, type: 'info'});
+	}
 	
 	await renderPostsAndUpdatePaginationControl(list, true);
 }

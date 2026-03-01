@@ -39,6 +39,7 @@ export let paginationControlVariables = {
 
 document.addEventListener('DOMContentLoaded', async () => {
 	lucide.createIcons();
+	localStorage.setItem('postIdUpdate', "");
 	await loadTemplate('../../../templates/tbody-posts-manager.html');
 	await loadTemplate('../../../templates/loading.html');
 
