@@ -6,9 +6,10 @@ import { paginationControlVariables } from "./postManagerController.js";
 import { dom } from "./postManagerController.js";
 import { renderPostsAndUpdatePaginationControl } from "./postManagerController.js";
 import { showToast } from "../../utils/toast.js";
+import { valueSearch } from "./search_post.js";
 
 dom.button_next_page.addEventListener('click', async () => {
-	try {
+	try {		
 		const list = await fetchPosts(dom.page.currentPageNumber + 1);
 		await renderPostsAndUpdatePaginationControl(list, true);
 	}
@@ -24,7 +25,14 @@ dom.button_previous_page.addEventListener('click', async () => {
 
 export async function fetchPosts(page) {
 	try {
-		if (paginationControlVariables.filter.status === PostStatus.ALL && paginationControlVariables.filter.category === PostCategory.ALL) {
+		if (valueSearch !== "") {
+			return await PostService.searchByTitle(
+				MediaTypes.JSON,
+				{page: page, size: 4, direction: 'asc'},
+				valueSearch
+			);
+		}
+		else if (paginationControlVariables.filter.status === PostStatus.ALL && paginationControlVariables.filter.category === PostCategory.ALL) {
 			return await PostService.findAllPostsPageable(
 				MediaTypes.JSON, 
 				{ page: page, size: 4, direction: 'asc' }

@@ -87,7 +87,7 @@ function fillInTheBannerAndTitleAndAuthor(post) {
   const banner = document.querySelector(".hero-card-banner");
 	titleElement.textContent = post.title;
 	authorInfoElement.textContent = `Autor, João Junio • ${new Date(post.date).toLocaleDateString()}`;
-  banner.src = post.bannerUrl;
+  banner.src = post.banner !== null ? post.banner.url : "";
 }
 
 async function displayNextsPosts(articleBody) {

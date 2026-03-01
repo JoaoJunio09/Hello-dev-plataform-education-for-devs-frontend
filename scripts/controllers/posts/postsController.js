@@ -16,6 +16,7 @@ import { PostStatus } from '../../models/enums/postStatus.js';
         // --- SELETORES DOM ---
         const dom = {
           adminToggleBtn: document.getElementById('admin-toggle-btn'),
+          loadingMoreArticlesBtn: document.getElementById('loading-more-articles'),
           adminToolbar: document.getElementById('admin-toolbar'),
           header: document.getElementById('main-header'),
           newsletterBtn: document.getElementById('newsletter-btn'),
@@ -47,7 +48,7 @@ import { PostStatus } from '../../models/enums/postStatus.js';
                     <div class="w-full lg:w-3/5 h-64 lg:h-full overflow-hidden relative">
                         <div class="absolute inset-0 bg-indigo-900/10 group-hover:bg-transparent transition-colors z-10"></div>
                         <img 
-                            src="${article.thumbnail.url !== null ? article.thumbnail.url : imgDefault}"
+                            src="${article.thumbnail !== null ? article.thumbnail.url : imgDefault}"
                             alt="${article.title}" 
                             class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                         />
@@ -63,7 +64,7 @@ import { PostStatus } from '../../models/enums/postStatus.js';
                          ${adminOverlay}
 
                         <div class="flex items-center gap-3 mb-4 text-sm font-medium text-slate-500">
-                            <span class="text-indigo-600 font-bold">Tecnologia</span>
+                            <span class="text-indigo-600 font-bold">${article.category}</span>
                             <span>•</span>
                             <span>${article.date}</span>
                         </div>
@@ -121,13 +122,13 @@ import { PostStatus } from '../../models/enums/postStatus.js';
                       <!-- Card Image -->
                       <div class="relative h-56 overflow-hidden">
                           <img 
-                              src="${article.thumbnail.url !== null ? article.thumbnail.url : imgDefault}"
+                              src="${article.thumbnail !== null ? article.thumbnail.url : imgDefault}"
                               alt="${article.title}" 
                               class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                           />
                           <div class="absolute top-4 left-4">
                               <span class="px-3 py-1 bg-white/95 backdrop-blur text-indigo-700 text-xs font-bold rounded-md shadow-sm">
-                                  Tecnologia
+                                  ${article.category}
                               </span>
                           </div>
                           ${adminOverlay}
@@ -167,7 +168,7 @@ import { PostStatus } from '../../models/enums/postStatus.js';
               })
             );
             
-            dom.articlesGrid.innerHTML = htmlArray.join('');
+            dom.articlesGrid.innerHTML += htmlArray.join('');
         }
 
         // Atualiza a UI baseada no estado

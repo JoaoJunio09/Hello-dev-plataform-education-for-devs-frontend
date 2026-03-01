@@ -7,6 +7,7 @@ const FIND_ALL_POSTS_BY_STATUS_PAGEABLE_URL = `${BASE_URL}/api/posts/v1/by-statu
 const FIND_ALL_POSTS_BY_CATEGORY_PAGEABLE_URL = `${BASE_URL}/api/posts/v1/by-category?category={category}&page={page}&size={size}&direction={direction}`;
 const FIND_ALL_POSTS_BY_STATUS_AND_CATEGORY_PAGEABLE_URL = `${BASE_URL}/api/posts/v1/by-status-and-category?status={status}&category={category}&page={page}&size={size}&direction={direction}`;
 const FIND_POST_BY_ID_URL = `${BASE_URL}/api/posts/v1/{postId}`;
+const SEARCH_POST_BY_TITLE = `${BASE_URL}/api/posts/v1/search?title={title}&page={page}&size={size}&direction={direction}`;
 const CREATE_POST_URL = `${BASE_URL}/api/posts/v1`;
 const UPLOAD_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/uploadImageFromPost/{postId}?category={category}`;
 const GET_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/getImageFromPost/{fileId}`;
@@ -14,7 +15,7 @@ const UPDATE_POST_URL = `${BASE_URL}/api/posts/v1`;
 const UPDATE_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/updateImageFromPost/{fileIdRemove}/{postId}?category={category}`;
 const DELETE_POST_URL = `${BASE_URL}/api/posts/v1/{postId}`;
 
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzE5NTY4MzEsImV4cCI6MTc3MTk2MDQzMSwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.yjBLIjFKwuhr6aJYnX3hSNjRQcrjldsO9DKcMp1CGlw";
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzIzOTIxOTIsImV4cCI6MTc3MjM5NTc5Miwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.hH_4WzVC3OwJWh7mWEs-M_WxULEH4Q3_nfjyziWCkWs";
 
 async function findAllPageable(contentType, pageable) {
 	try {
@@ -169,6 +170,35 @@ async function findById(postId, contentType) {
 	return await response.json();
 }
 
+async function searchByTitle(contentType, pageable, title) {
+	try {
+		const urlTitle = SEARCH_POST_BY_TITLE.replace("{title}", title);
+		const urlPage = urlTitle.replace("{page}", pageable.page);
+		const urlSize = urlPage.replace("{size}", pageable.size);
+		const url = urlSize.replace("{direction}", pageable.direction);
+		const response = await fetch(url, {
+			'method': 'GET',
+			'headers': {
+				'Accept': contentType,
+				'Authorization': `Bearer ${TOKEN}`,
+			}
+		});
+
+		if (response.status === 500) {
+			throw new Exceptions.ServerConnectionException("Internal Server Error while fetching posts.");
+		}
+
+		if (!response.ok) {
+			throw new Error(`Error fetching [searchByTitle] posts: ${response.statusText}`);
+		}
+
+		return await response.json();
+	}
+	catch (e) {
+		if (e instanceof Exceptions.ServerConnectionException) throw e;
+	}
+}
+
 async function create(post, contentType) {
 	const response = await fetch(CREATE_POST_URL, {
 		'method': 'POST',
@@ -279,6 +309,7 @@ export const PostService = {
 	findAllPostsPageableByCategory: findAllPageableByCategory,
 	findAllPostsPageableByStatusAndCategory: findAllPageableByStatusAndCategory,
 	findByIdPost: findById,
+	searchByTitle: searchByTitle,
 	createPost: create,
 	updatePost: update,
 	deletePost: deletePost,
