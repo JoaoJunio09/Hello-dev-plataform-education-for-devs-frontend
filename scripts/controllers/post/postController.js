@@ -59,10 +59,26 @@ async function displayPost(post) {
     rendererMascotInteractFocus(articleBody);
     rendererCommentsSection(post, articleBody);
 		generateIndex();
+
+    initializeButtons();
 	}
 	catch (e) {
 		console.error("Error displaying post:", e);
 	}
+}
+
+function initializeButtons() {
+  const btnComment = document.querySelector(".btn-comment");
+  const commentTextArea = document.querySelector("#comment-text");
+  const commentUserName = document.querySelector("#comment-username");
+
+  btnComment.addEventListener('click', () => {
+    addComent(commentUserName.value, commentTextArea.value);
+  });
+}
+
+async function addComent(username, comment) {
+  console.log(username)
 }
 
 function goToTheNextPost() {
