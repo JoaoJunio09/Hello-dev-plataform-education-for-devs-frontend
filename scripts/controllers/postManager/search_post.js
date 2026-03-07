@@ -25,6 +25,16 @@ const handleSearch = async (value) => {
 
 	if (list._embedded === undefined) {
 		showToast({message: `Não existe resultados para ${value}`, type: 'info'});
+		setTimeout(async () => {
+			await renderPostsAndUpdatePaginationControl(
+				await PostService.findAllPostsPageable(
+					MediaTypes.JSON, 
+					{ page: 0, size: 4, direction: 'asc' }
+				), true
+			);
+
+			dom.search.value = "";
+		}, 2500);
 	}
 	
 	await renderPostsAndUpdatePaginationControl(list, true);

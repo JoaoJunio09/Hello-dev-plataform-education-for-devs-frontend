@@ -27,6 +27,7 @@ export function rendererTBodyPostsManager(posts, tbody, update) {
 			? "Backend" : (post.category === PostCategory.FRONTEND 
 			? "Frontend" : "Carreira"));
 		const { dateFormated, daysDiference } = formatDate(post.date);
+		console.log(daysDiference);
 		date.textContent = dateFormated;
 		days.textContent = daysDiference;
 		commentesInfo.textContent = 0;
@@ -42,9 +43,39 @@ export function rendererTBodyPostsManager(posts, tbody, update) {
 
 function formatDate(date) {
 	const [year, month, day] = date.split("-");
+	const postDate = new Date(year, month - 1, day);
+	const now = new Date();
+
 	const dateFormated = `${day} ${returnedMonthStringOfMonth(month)}, ${year}`;
-	const daysDiference = new Date().getDate() - day === 0 ? "Hoje" : `Há ${new Date().getDate() - day} dias`;
-	return { dateFormated: dateFormated, daysDiference: daysDiference };
+
+	let daysDiference = null;
+
+	const diffTime = now - postDate;
+	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+	if (diffDays === 0) {
+		daysDiference = "Hoje";
+	} 
+	else if (
+		now.getMonth() === postDate.getMonth() &&
+		now.getFullYear() === postDate.getFullYear()
+	) {
+		daysDiference = `Há ${diffDays} dias`;
+	} 
+	else {
+		const diffMonths =
+			(now.getFullYear() - postDate.getFullYear()) * 12 +
+			(now.getMonth() - postDate.getMonth());
+
+		daysDiference = diffMonths === 1
+			? "Há 1 mês"
+			: `Há ${diffMonths} meses`;
+	}
+
+	return {
+		dateFormated: dateFormated,
+		daysDiference: daysDiference
+	};
 }
 
 function returnedMonthStringOfMonth(month) {

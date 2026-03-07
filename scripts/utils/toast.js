@@ -70,7 +70,7 @@ export function showToast({
 
 	// Auto-fechamento
 	const timeout = setTimeout(() => {
-			closeToast(toastId);
+		closeToast(toastId);
 	}, duration);
 
 	// Armazena o timeout no elemento para cancelar se fechado manualmente
