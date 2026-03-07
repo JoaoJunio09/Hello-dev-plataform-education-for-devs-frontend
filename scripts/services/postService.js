@@ -15,7 +15,7 @@ const UPDATE_POST_URL = `${BASE_URL}/api/posts/v1`;
 const UPDATE_IMAGE_FROM_POST_URL = `${BASE_URL}/api/posts/v1/updateImageFromPost/{fileIdRemove}/{postId}?category={category}`;
 const DELETE_POST_URL = `${BASE_URL}/api/posts/v1/{postId}`;
 
-const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzI5MTE3OTUsImV4cCI6MTc3MjkxNTM5NSwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.9es7Z_4va69HFVGri5H2zDpvUfYmP_PmW0EyWd6qXHk";
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE3NzI5MTg5MTIsImV4cCI6MTc3MjkyMjUxMiwic3ViIjoiam90YWpvdGEiLCJyb2xlcyI6W119.GWjK8U52DQgRZtjj1DqV8WDytBJ9juvadzvdW8RNNSY";
 
 async function findAllPageable(contentType, pageable) {
 	try {
@@ -299,7 +299,7 @@ async function deletePost(postId, contentType) {
 		throw new Error(`Error deleting post: ${response.statusText}`);
 	}
 
-	return;
+	return response.status;
 }
 
 export const PostService = {

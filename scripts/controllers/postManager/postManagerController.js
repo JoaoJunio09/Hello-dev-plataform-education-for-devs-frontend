@@ -6,6 +6,7 @@ import { rendererLoading } from '../../renderers/loadingRenderer.js';
 import { PostStatus } from '../../models/enums/postStatus.js';
 import { Exceptions } from '../../exceptions/exceptions.js';
 import { PostCategory } from '../../models/enums/postCategory.js';
+import { showToast } from '../../utils/toast.js';
 
 export let dom = {
 	button_next_page: document.querySelector("#button-next-page"),
@@ -144,7 +145,7 @@ function initializeButtonsPost() {
 
 	document.querySelectorAll("#btn-remove").forEach(btn => {
 		btn.addEventListener('click', async (event) => {
-			console.log("clico");
+			remove(event);
 		});
 	});
 }
@@ -155,6 +156,19 @@ async function edit(event) {
 	if (post !== null) {
 		localStorage.setItem('postIdUpdate', postId);
 		window.location.href = '../../../createPost.html';
+	}
+}
+
+async function remove(event) {
+	const postId = event.target.closest(".table-row-hover").dataset.id;
+	const response_status = await PostService.deletePost(postId, MediaTypes.JSON);
+
+	if (response_status === 204 ) {
+		showToast({message: 'Post excluído com sucesso', type: 'success'});
+		setTimeout(() => { location.reload() }, 2000);
+	}
+	else {
+		showToast({message: 'Não foi possível excluir Post', type: 'error'});
 	}
 }
 

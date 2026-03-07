@@ -27,7 +27,6 @@ export function rendererTBodyPostsManager(posts, tbody, update) {
 			? "Backend" : (post.category === PostCategory.FRONTEND 
 			? "Frontend" : "Carreira"));
 		const { dateFormated, daysDiference } = formatDate(post.date);
-		console.log(daysDiference);
 		date.textContent = dateFormated;
 		days.textContent = daysDiference;
 		commentesInfo.textContent = 0;
