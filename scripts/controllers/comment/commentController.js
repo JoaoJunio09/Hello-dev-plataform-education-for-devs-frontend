@@ -1,3 +1,31 @@
+import { Exceptions } from "../../exceptions/exceptions.js";
+import { showToast } from '../../utils/toast.js';
+
+export async function makeComment(postId, usernameText, commentText) {
+  try {
+    if (usernameText === "" || commentText === "") {
+      throw new Exceptions.TheDataIsEmptyOsNull("Preencha todas as informações");
+    }
+
+    let comment = {
+      content: commentText
+      user: {
+        username: usernameText
+      },
+      postId: postId
+    };
+
+    console.log(comment);
+  }
+  catch (e) {
+    if (e instanceof Exceptions.TheDataIsEmptyOsNull) {
+      showToast({message: 'Preencha todas as informações', type: 'info'});
+    } else {
+      showToast({message: 'Não foi possível efetuar comentário', type: 'error'});
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Delegar clique para Likes em comentários (melhor performance)
     document.addEventListener('click', (e) => {

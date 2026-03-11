@@ -7,6 +7,8 @@ import { rendererCommentsSection } from '../../renderers/rendererCommentsSection
 import { rendererMascotInteractFocus } from '../../renderers/rendererMascotInteractFocus.js';
 import { rendererLoading } from '../../renderers/loadingRenderer.js';
 import { showToast } from '../../utils/toast.js';
+import { Exceptions } from '../../exceptions/exceptions.js';
+import { makeComment } from '../comment/commentController.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadTemplate('../../../templates/post-content.html');
@@ -34,51 +36,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadPost() {
-	try {
-		const postId = localStorage.getItem('postId');
-		const postTitle = localStorage.getItem('postTitle');
+	const postId = localStorage.getItem('postId');
+	const postTitle = localStorage.getItem('postTitle');
 
-		const post = await PostService.findByIdPost(postId, MediaTypes.JSON);
-    displayPost(post);
+	const post = await PostService.findByIdPost(postId, MediaTypes.JSON);
+  displayPost(post);
 
-		document.title = postTitle + " | HelloDev Blog";
-	}
-	catch (e) {
-		throw e;
-	}
+	document.title = postTitle + " | HelloDev Blog";
 }
 
 async function displayPost(post) {
-	try {
-	  const htmlContent = marked.parse(post.content);
-    const articleBody = document.querySelector('.article-body');
+	const htmlContent = marked.parse(post.content);
+  const articleBody = document.querySelector('.article-body');
 
-		fillInTheBannerAndTitleAndAuthor(post);
-		rendererPost(htmlContent, articleBody);
-    await displayNextsPosts(articleBody);
-    rendererMascotInteractFocus(articleBody);
-    rendererCommentsSection(post, articleBody);
-		generateIndex();
+	fillInTheBannerAndTitleAndAuthor(post);
+	rendererPost(htmlContent, articleBody);
+  await displayNextsPosts(articleBody);
+  rendererMascotInteractFocus(articleBody);
+  rendererCommentsSection(post, articleBody);
+	generateIndex();
 
-    initializeButtons();
-	}
-	catch (e) {
-		console.error("Error displaying post:", e);
-	}
+  initializeButtons();
 }
 
 function initializeButtons() {
   const btnComment = document.querySelector(".btn-comment");
   const commentTextArea = document.querySelector("#comment-text");
   const commentUserName = document.querySelector("#comment-username");
+  const postId = Number.parseInt(localStorage.getItem('postId'));
 
   btnComment.addEventListener('click', () => {
-    addComent(commentUserName.value, commentTextArea.value);
+    makeComment(postId, commentUserName.value, commentTextArea.value);
   });
-}
-
-async function addComent(username, comment) {
-  console.log(username)
 }
 
 function goToTheNextPost() {
